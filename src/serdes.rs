@@ -17,7 +17,7 @@ struct NavMeshTileHeader {
     data_size: c_int
 }
 
-pub fn import(
+pub(crate) fn import_from_array(
     buf: Vec<u8>
 ) -> Result<*const dtNavMesh, String> {
 
