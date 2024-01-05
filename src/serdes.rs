@@ -17,8 +17,8 @@ struct NavMeshTileHeader {
     data_size: c_int
 }
 
-pub(crate) fn import_from_array(
-    buf: Vec<u8>
+pub(crate) fn deserialize(
+    buf: &[u8]
 ) -> Result<*const dtNavMesh, String> {
 
     unsafe { 
