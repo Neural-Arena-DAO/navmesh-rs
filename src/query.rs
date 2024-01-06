@@ -208,4 +208,47 @@ impl NavMeshQuery {
             }
         }
     }
+
+    pub fn distance_to_wall(
+        &self,
+        center: &Vector3,
+        radius: f32
+    ) -> Option<(f32, Vector3, Vector3)> {
+        unsafe { 
+            let center_point = center.to_slice();
+            let center_ref = self.find_poly_ref(&center_point);
+            let mut hit_dist = 0.0f32;
+            let mut hit_pos = [0.0f32; 3];
+            let mut hit_normal = [0.0f32; 3];
+
+            if self.query.findDistanceToWall(
+                center_ref,
+                center_point.as_ptr(),
+                radius,
+                &FILTER,
+                &mut hit_dist,
+                hit_pos.as_mut_ptr(),
+                hit_normal.as_mut_ptr()
+            ) == DT_SUCCESS {
+                if hit_dist == f32::MAX {
+                    None
+                }
+                else {
+                    if hit_dist == radius {
+                        None
+                    }
+                    else {
+                        Some((
+                            hit_dist, 
+                            Vector3::from_slice(&hit_pos),
+                            Vector3::from_slice(&hit_normal)
+                        ))
+                    }
+                }
+            }
+            else {
+                None
+            }
+        }
+    }
 }
