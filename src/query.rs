@@ -1,5 +1,5 @@
 use std::ptr::{null_mut, addr_of_mut};
-use recastnavigation_sys::{dtNavMeshQuery, dtPolyRef, dtQueryFilter, DT_SUCCESS};
+use recastnavigation_sys::{dtNavMeshQuery, dtPolyRef, dtQueryFilter, DT_SUCCESS, dtRaycastHit};
 use three_rs::math::vector3::Vector3;
 
 use crate::navmesh::NavMesh;
@@ -56,7 +56,12 @@ impl NavMeshQuery {
         unsafe {
             let mut pos_overlay = false;
             let mut closest = [0.0f32; 3];
-            if self.query.closestPointOnPoly(poly_ref, point.as_ptr(), addr_of_mut!(closest) as _, addr_of_mut!(pos_overlay)) != DT_SUCCESS {
+            if self.query.closestPointOnPoly(
+                poly_ref, 
+                point.as_ptr(), 
+                addr_of_mut!(closest) as _, 
+                addr_of_mut!(pos_overlay)
+            ) != DT_SUCCESS {
                 Vector3::zero()
             }
             else {
@@ -72,7 +77,13 @@ impl NavMeshQuery {
         unsafe {
             let point = pos.to_slice();
             let mut poly_ref: dtPolyRef = 0;
-            if self.query.findNearestPoly(point.as_ptr(), EXTENTS.as_ptr(), &FILTER, addr_of_mut!(poly_ref), null_mut()) != DT_SUCCESS {
+            if self.query.findNearestPoly(
+                point.as_ptr(), 
+                EXTENTS.as_ptr(), 
+                &FILTER, 
+                addr_of_mut!(poly_ref), 
+                null_mut()
+            ) != DT_SUCCESS {
                 Vector3::zero()
             }
             else {
@@ -148,6 +159,53 @@ impl NavMeshQuery {
             }
 
             points
+        }
+    }
+
+    pub fn raycast(
+        &self,
+        a: &Vector3,
+        b: &Vector3
+    ) -> Option<(f32, Vector3)> {
+        unsafe { 
+            let a_point = a.to_slice();
+            let b_point = b.to_slice();
+
+            let a_ref = self.find_poly_ref(&a_point);
+
+            let mut hit = dtRaycastHit {
+                t: 0.0,
+                hitNormal: [0.0f32; 3],
+                hitEdgeIndex: 0,
+                path: null_mut(),
+                pathCount: 0,
+                maxPath: 0,
+                pathCost: 0.0,
+            };
+
+            if self.query.raycast1(
+                a_ref,
+                a_point.as_ptr(),
+                b_point.as_ptr(),
+                &FILTER,
+                0,
+                &mut hit,
+                0
+            ) == DT_SUCCESS {
+                if hit.t == f32::MAX {
+                    None
+                }
+                else {
+                    
+                    Some((
+                        hit.t, 
+                        Vector3::from_slice(&hit.hitNormal)
+                    ))
+                }
+            }
+            else {
+                None
+            }
         }
     }
 }
