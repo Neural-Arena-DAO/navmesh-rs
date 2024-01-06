@@ -50,12 +50,17 @@ pub(crate) fn deserialize(
             maxTiles: 0,
             maxPolys: 0,
         };
-        copy_nonoverlapping(&buf[i] as *const u8, addr_of_mut!(params) as _, size_of::<dtNavMeshParams>());
+        copy_nonoverlapping(
+            &buf[i] as *const u8, 
+            addr_of_mut!(params) as _, 
+            size_of::<dtNavMeshParams>()
+        );
         i += size_of::<dtNavMeshParams>();
         
         // create a nav mesh
         let nav_mesh = dtAllocNavMesh();
-        if nav_mesh.as_mut().unwrap().init(&params as *const dtNavMeshParams) != DT_SUCCESS {
+        if nav_mesh.as_mut().unwrap()
+            .init(&params as *const dtNavMeshParams) != DT_SUCCESS {
             return Err("Could not initialize Navmesh".to_string());
         }
 
@@ -65,7 +70,11 @@ pub(crate) fn deserialize(
                 data_size: 0,
                 tile_ref: 0
             };
-            copy_nonoverlapping(&buf[i] as *const u8, addr_of_mut!(tile_header) as _, size_of::<NavMeshTileHeader>());
+            copy_nonoverlapping(
+                &buf[i] as *const u8, 
+                addr_of_mut!(tile_header) as _, 
+                size_of::<NavMeshTileHeader>()
+            );
             i += size_of::<NavMeshTileHeader>();
 
             // EOL?
@@ -73,15 +82,28 @@ pub(crate) fn deserialize(
                 break;
             }
 
-            let data = dtAlloc(tile_header.data_size as usize, dtAllocHint_DT_ALLOC_PERM) as *mut u8;
+            let data = dtAlloc(
+                tile_header.data_size as usize, 
+                dtAllocHint_DT_ALLOC_PERM
+            ) as *mut u8;
             if data.is_null() {
                 return Err("Could not allocated memory for Navmesh tile".to_string());
             }
 
-            data.copy_from(buf.as_ptr().add(i) as _, tile_header.data_size as usize);
+            data.copy_from(
+                buf.as_ptr().add(i) as _, 
+                tile_header.data_size as usize
+            );
             i += tile_header.data_size as usize;
 
-            if nav_mesh.as_mut().unwrap().addTile(data, tile_header.data_size, dtTileFlags_DT_TILE_FREE_DATA, tile_header.tile_ref, null_mut()) != DT_SUCCESS {
+            if nav_mesh.as_mut().unwrap()
+                .addTile(
+                    data, 
+                    tile_header.data_size, 
+                    dtTileFlags_DT_TILE_FREE_DATA, 
+                    tile_header.tile_ref, 
+                    null_mut()
+                ) != DT_SUCCESS {
                 return Err("Could not add tile to Navmesh".to_string());
             }
         }
