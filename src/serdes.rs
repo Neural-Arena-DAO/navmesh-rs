@@ -1,7 +1,15 @@
 use std::{os::raw::c_int, mem::size_of, ptr::{null_mut, copy_nonoverlapping, addr_of_mut}};
-use recastnavigation_sys::{dtNavMeshParams, dtTileRef, dtNavMesh, dtAlloc, dtAllocHint_DT_ALLOC_PERM, dtTileFlags_DT_TILE_FREE_DATA, dtAllocNavMesh, DT_SUCCESS};
+use recastnavigation_sys::{
+    dtNavMeshParams, dtTileRef, dtNavMesh, dtAlloc, 
+    dtAllocHint_DT_ALLOC_PERM, dtTileFlags_DT_TILE_FREE_DATA, 
+    dtAllocNavMesh, DT_SUCCESS
+};
 
-const NAVMESHSET_MAGIC: c_int = ('M' as c_int) << 24 | ('S' as c_int) << 16 | ('E' as c_int) << 8 | ('T' as c_int); //'MSET'
+const NAVMESHSET_MAGIC: c_int = 
+    ('M' as c_int) << 24 | 
+    ('S' as c_int) << 16 | 
+    ('E' as c_int) << 8 | 
+    ('T' as c_int); //'MSET'
 const NAVMESHSET_VERSION: c_int = 1;
 
 #[repr(C)]
@@ -30,7 +38,11 @@ pub(crate) fn deserialize(
             version: 0,
             num_tiles: 0,
         };
-        copy_nonoverlapping(&buf[i] as *const u8, addr_of_mut!(recast_header) as _, size_of::<RecastHeader>());
+        copy_nonoverlapping(
+            &buf[i] as *const u8, 
+            addr_of_mut!(recast_header) as _, 
+            size_of::<RecastHeader>()
+        );
         i += size_of::<RecastHeader>();
 
         // do basic checks
