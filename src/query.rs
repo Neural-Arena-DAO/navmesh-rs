@@ -13,17 +13,20 @@ const FILTER: dtQueryFilter = dtQueryFilter {
 
 pub struct NavMeshQuery {
     pub query: dtNavMeshQuery,
+    pub max_path_len: usize,
 }
 
 impl NavMeshQuery {
     pub fn new(
-        navmesh: &NavMesh
+        navmesh: &NavMesh,
+        max_path_len: usize
     ) -> Self {
         unsafe {
             let mut query = dtNavMeshQuery::new();
             query.init(navmesh.nav, 512);
             Self {
-                query
+                query,
+                max_path_len
             }
         }
     }
@@ -95,8 +98,7 @@ impl NavMeshQuery {
     pub fn find_path(
         &self,
         a: &Vector3,
-        b: &Vector3,
-        max_path_len: usize
+        b: &Vector3
     ) -> Vec<Vector3> {
         unsafe { 
             let a_point = a.to_slice();
@@ -105,7 +107,7 @@ impl NavMeshQuery {
             let a_ref = self.find_poly_ref(&a_point);
             let b_ref = self.find_poly_ref(&b_point);
 
-            let mut path = vec![0; max_path_len];
+            let mut path = vec![0 as dtPolyRef; self.max_path_len];
             let mut path_count = 0;
 
             if self.query.findPath(
@@ -133,9 +135,9 @@ impl NavMeshQuery {
                 Vector3::new(b.x, b.y, b.z)
             };
 
-            let mut straight_path = vec![0.0f32; max_path_len * 3];
-            let mut straight_path_flags = vec![0u8; max_path_len];
-            let mut straight_path_refs = vec![0u32; max_path_len];
+            let mut straight_path = vec![0.0f32; self.max_path_len * 3];
+            let mut straight_path_flags = vec![0u8; self.max_path_len];
+            let mut straight_path_refs = vec![0 as dtPolyRef; self.max_path_len];
             let mut straight_path_count = 0;
 
             if self.query.findStraightPath(
@@ -147,7 +149,7 @@ impl NavMeshQuery {
                 straight_path_flags.as_mut_ptr(),
                 straight_path_refs.as_mut_ptr(),
                 &mut straight_path_count,
-                max_path_len as _,
+                self.max_path_len as _,
                 0
             ) != DT_SUCCESS {
                 return vec![];
@@ -164,12 +166,12 @@ impl NavMeshQuery {
 
     pub fn raycast(
         &self,
-        a: &Vector3,
-        b: &Vector3
+        from: &Vector3,
+        to: &Vector3
     ) -> Option<(f32, Vector3)> {
         unsafe { 
-            let a_point = a.to_slice();
-            let b_point = b.to_slice();
+            let a_point = from.to_slice();
+            let b_point = to.to_slice();
 
             let a_ref = self.find_poly_ref(&a_point);
 
@@ -245,6 +247,65 @@ impl NavMeshQuery {
                         ))
                     }
                 }
+            }
+            else {
+                None
+            }
+        }
+    }
+
+    pub fn get_poly_height(
+        &self,
+        poly_ref: dtPolyRef,
+        pos: &[f32; 3]
+    ) -> Option<f32> {
+        unsafe {
+            let mut height = 0.0f32;
+
+            if self.query.getPolyHeight(
+                poly_ref,
+                pos.as_ptr(),
+                &mut height
+            ) == DT_SUCCESS {
+                Some(height)
+            }
+            else {
+                None
+            }
+        }
+    }
+
+    pub fn move_along_surface(
+        &self,
+        from: &Vector3,
+        to: &Vector3
+    ) -> Option<Vector3> {
+        unsafe { 
+            let a_point = from.to_slice();
+            let b_point = to.to_slice();
+
+            let a_ref = self.find_poly_ref(&a_point);
+
+            let mut pos = [0.0f32; 3];
+            let mut visited = vec![0 as dtPolyRef; self.max_path_len];
+            let mut visited_count = 0;
+
+            if self.query.moveAlongSurface(
+                a_ref,
+                a_point.as_ptr(),
+                b_point.as_ptr(),
+                &FILTER,
+                pos.as_mut_ptr(),
+                visited.as_mut_ptr(),
+                &mut visited_count,
+                self.max_path_len as _
+            ) == DT_SUCCESS {
+                let last_poly_ref = visited[(visited_count - 1) as usize];
+                if let Some(height) = self.get_poly_height(last_poly_ref, &pos) {
+                    pos[1] = height;
+                }
+
+                Some(Vector3::from_slice(&pos))
             }
             else {
                 None
