@@ -4,7 +4,7 @@ use three_rs::math::vector3::Vector3;
 
 use crate::navmesh::NavMesh;
 
-const EXTENTS: [f32; 3] = [1.0, 1.0, 1.0];
+const EXTENTS: [f32; 3] = [0.6, 2.0, 0.6];
 const FILTER: dtQueryFilter = dtQueryFilter {
     m_areaCost: [1.0; 64],
     m_includeFlags: 0xffff,

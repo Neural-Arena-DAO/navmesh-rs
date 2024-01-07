@@ -1,5 +1,5 @@
 use recastnavigation_sys::{dtNavMesh, dtFreeNavMesh};
-use super::serdes::deserialize;
+use super::import::mset::from_mset;
 
 pub struct NavMesh {
     pub nav: *mut dtNavMesh,
@@ -17,7 +17,7 @@ impl NavMesh {
     pub fn from_bytes(
         buf: &[u8]
     ) -> Self {
-        match deserialize(buf) {
+        match from_mset(buf) {
             Err(msg) => panic!("{}", msg),
             Ok(navmesh) => {
                 Self {

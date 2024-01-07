@@ -25,7 +25,7 @@ struct NavMeshTileHeader {
     data_size: c_int
 }
 
-pub(crate) fn deserialize(
+pub(crate) fn from_mset(
     buf: &[u8]
 ) -> Result<*const dtNavMesh, String> {
 
