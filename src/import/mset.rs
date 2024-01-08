@@ -112,7 +112,7 @@ pub(crate) fn from_mset(
                 .addTile(
                     data, 
                     tile_header.data_size, 
-                    dtTileFlags_DT_TILE_FREE_DATA, 
+                    dtTileFlags_DT_TILE_FREE_DATA as _, 
                     tile_header.tile_ref, 
                     null_mut()
                 ) != DT_SUCCESS {

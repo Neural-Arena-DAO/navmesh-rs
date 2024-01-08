@@ -7,5 +7,5 @@ edition = "2021"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-recastnavigation-sys = {version = "1.0.2", features = ["detour"]}
+recastnavigation-sys = {version = "1.0.2", features = ["detour"], path = "../../clones/recastnavigation-rs-sys"}
 three-rs = {version = "0.1.0", path = "../three-rs"}
