@@ -185,7 +185,7 @@ impl NavMeshQuery {
                 pathCost: 0.0,
             };
 
-            if self.query.raycast1(
+            self.query.raycast1(
                 a_ref,
                 a_point.as_ptr(),
                 b_point.as_ptr(),
@@ -193,20 +193,16 @@ impl NavMeshQuery {
                 0,
                 &mut hit,
                 0
-            ) == DT_SUCCESS {
-                if hit.t == f32::MAX {
-                    None
-                }
-                else {
-                    
-                    Some((
-                        hit.t, 
-                        Vector3::from_slice(&hit.hitNormal)
-                    ))
-                }
+            );
+            
+            if hit.t == f32::MAX {
+                None
             }
             else {
-                None
+                Some((
+                    hit.t, 
+                    Vector3::from_slice(&hit.hitNormal)
+                ))
             }
         }
     }
