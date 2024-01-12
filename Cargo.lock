@@ -429,6 +429,8 @@ dependencies = [
 [[package]]
 name = "recastnavigation-sys"
 version = "1.0.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f0fe62a580b3da03673e84849beb8c93ec8e7d1667da3f2eb46508b23b40a1af"
 dependencies = [
  "bindgen",
  "cc",
