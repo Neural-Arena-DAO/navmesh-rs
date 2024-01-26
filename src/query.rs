@@ -11,6 +11,7 @@ const FILTER: dtQueryFilter = dtQueryFilter {
     m_excludeFlags: 0,
 };
 
+#[derive(Debug)]
 pub struct NavMeshQuery {
     pub query: dtNavMeshQuery,
     pub max_path_len: usize,

@@ -1,6 +1,7 @@
 use recastnavigation_sys::{dtNavMesh, dtFreeNavMesh};
 use super::import::mset::from_mset;
 
+#[derive(Debug)]
 pub struct NavMesh {
     pub nav: *mut dtNavMesh,
 }
