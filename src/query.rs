@@ -65,7 +65,7 @@ impl NavMeshQuery {
                 point.as_ptr(), 
                 addr_of_mut!(closest) as _, 
                 addr_of_mut!(pos_overlay)
-            ) != DT_SUCCESS {
+            ) & DT_SUCCESS == 0 {
                 Vector3::zero()
             }
             else {
@@ -87,7 +87,7 @@ impl NavMeshQuery {
                 &FILTER, 
                 addr_of_mut!(poly_ref), 
                 null_mut()
-            ) != DT_SUCCESS {
+            ) & DT_SUCCESS == 0 {
                 Vector3::zero()
             }
             else {
@@ -120,7 +120,7 @@ impl NavMeshQuery {
                 path.as_mut_ptr(),
                 &mut path_count,
                 path.len() as i32,
-            ) != DT_SUCCESS {
+            ) & DT_SUCCESS == 0 {
                 return vec![];
             }
 
@@ -152,7 +152,7 @@ impl NavMeshQuery {
                 &mut straight_path_count,
                 self.max_path_len as _,
                 0
-            ) != DT_SUCCESS {
+            ) & DT_SUCCESS == 0 {
                 return vec![];
             }
 
@@ -228,7 +228,7 @@ impl NavMeshQuery {
                 &mut hit_dist,
                 hit_pos.as_mut_ptr(),
                 hit_normal.as_mut_ptr()
-            ) == DT_SUCCESS {
+            ) & DT_SUCCESS != 0 {
                 if hit_dist == f32::MAX {
                     None
                 }
@@ -263,7 +263,7 @@ impl NavMeshQuery {
                 poly_ref,
                 pos.as_ptr(),
                 &mut height
-            ) == DT_SUCCESS {
+            ) & DT_SUCCESS != 0 {
                 Some(height)
             }
             else {
@@ -296,7 +296,7 @@ impl NavMeshQuery {
                 visited.as_mut_ptr(),
                 &mut visited_count,
                 self.max_path_len as _
-            ) == DT_SUCCESS {
+            ) & DT_SUCCESS != 0 {
                 let last_poly_ref = visited[(visited_count - 1) as usize];
                 if let Some(height) = self.get_poly_height(last_poly_ref, &pos) {
                     pos[1] = height;
